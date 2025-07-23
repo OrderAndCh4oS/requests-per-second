@@ -1,10 +1,8 @@
-// src/precise-ticker.ts
-import { Worker } from 'node:worker_threads';
-import { URL } from 'node:url';
+import {Worker} from "worker_threads";
 
 /**
  * Call `fn` exactly `rateHz` times per second
- * for `durationSec` seconds (≈ rateHz × durationSec calls).
+ * for `durationSec` seconds (≈ rateHz*durationSec calls).
  *
  * Resolves when the run finishes.  Any error in the worker
  * rejects the promise.
@@ -17,16 +15,13 @@ export function callNPerSecond(
     if (rateHz <= 0) throw new Error('rateHz must be > 0');
     if (durationSec <= 0) throw new Error('durationSec must be > 0');
 
-    // Resolve the compiled worker file next to this module.
-    // (tsc will emit precise‑ticker-worker.js in the same dir.)
-    const workerUrl = new URL('./precise-ticker-worker.js', import.meta.url);
+    const workerUrl = new URL('./precise-ticker-worker.ts', import.meta.url);
 
     return new Promise((resolve, reject) => {
         const worker = new Worker(workerUrl, {
-            workerData: { rateHz, durationSec },
+            workerData: {rateHz, durationSec},
         });
 
-        // One 'message' event per tick.
         worker.on('message', fn);
 
         worker.once('error', reject);
